@@ -141,7 +141,28 @@ public class ThrowController : MonoBehaviour
             ForceMode.VelocityChange
         );
     }
+    void ExecuteThrow()
+    {
+        if (projectile == null) return;
 
+        Vector2 swipeVector = endTouchPos - startTouchPos;
+
+        Vector3 throwForce = new Vector3(
+            swipeVector.x * throwPower, 
+            swipeVector.magnitude * throwPower * upwardArcMultiplier, 
+            swipeVector.y * throwPower
+        );
+
+        projectile.isKinematic = false;
+        
+        // ADD THIS LINE: Unlock the sound right before applying the physics force
+        projectile.GetComponent<DistractionProjectile>().isThrown = true; 
+
+        projectile.AddForce(throwForce, ForceMode.Impulse);
+        
+        projectile = null; // Prevents throwing the same object twice
+    }
+    
     private bool TryGetGroundPoint(
         Vector2 screenPosition,
         out Vector3 worldPoint

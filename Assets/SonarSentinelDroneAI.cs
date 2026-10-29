@@ -8,8 +8,8 @@ using UnityEngine.AI;
 /// State order from the GDD:
 /// Patrol -> Alert -> InvestigateNoise -> Search -> Resume -> Patrol.
 ///
-/// This is one script for the drone. When a throwable hits something, its script
-/// can call SonarSentinelDroneAI.EmitNoise(position, radius) to alert nearby drones.
+/// This script now actively listens to the global SonarNoiseBus 
+/// triggered by the player's DistractionProjectile.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class SonarSentinelDroneAI : MonoBehaviour
@@ -23,9 +23,6 @@ public class SonarSentinelDroneAI : MonoBehaviour
         Search,
         Resume
     }
-
-    // All enabled drones listen to this event for new sound disturbances.
-    private static event Action<Vector3, float> NoiseEmitted;
 
     [Header("Patrol Area")]
     [Tooltip("Optional collider marking the area the drone should stay inside. A trigger BoxCollider is a simple choice.")]
@@ -91,14 +88,14 @@ public class SonarSentinelDroneAI : MonoBehaviour
 
     private void OnEnable()
     {
-        // Start listening when this component is enabled.
-        NoiseEmitted += OnNoiseEmitted;
+        // Connect Anuraag's AI directly to YOUR global projectile bus
+        SonarNoiseBus.NoiseCreated += OnNoiseEmitted;
     }
 
     private void OnDisable()
     {
-        // Remove this listener when disabled to prevent stale event subscriptions.
-        NoiseEmitted -= OnNoiseEmitted;
+        // Unsubscribe to prevent memory leaks when the drone is destroyed
+        SonarNoiseBus.NoiseCreated -= OnNoiseEmitted;
     }
 
     private void Start()
@@ -291,19 +288,18 @@ public class SonarSentinelDroneAI : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
-    // SOUND: other scripts call EmitNoise when a throwable hits something.
+    // SOUND: Core logic updated to use SonarNoiseBus
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// Broadcast a sound to every active drone.
-    /// Example for a future throwable collision: SonarSentinelDroneAI.EmitNoise(hitPoint, 8f);
-    /// The radius is measured in Unity world units.
+    /// Broadcast a sound to every active drone via the central bus.
     /// </summary>
     public static void EmitNoise(Vector3 soundPosition, float hearingRadius)
     {
         if (hearingRadius > 0f)
         {
-            NoiseEmitted?.Invoke(soundPosition, hearingRadius);
+            // Route inspector tests through your event bus to ensure consistency
+            SonarNoiseBus.RaiseNoise(soundPosition, hearingRadius);
         }
     }
 

@@ -17,7 +17,22 @@ public static class SonarNoiseBus
         NoiseCreated?.Invoke(position, radius);
     }
 }
+// Add this variable at the top with your other settings
+    public bool isThrown = false; 
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Add this guard clause: if it hasn't been thrown, ignore all collisions
+        if (!isThrown) return; 
+
+        if (hasEmittedNoise)
+            return;
+
+        Debug.Log("PROJECTILE HIT! Sending coordinates to the Drone.");    
+        hasEmittedNoise = true;
+
+        SonarNoiseBus.RaiseNoise(transform.position, noiseRadius);
+    }
 /// <summary>
 /// Attach this component to the thrown distraction-object prefab.
 /// Emits one sound event on its first collision.
@@ -45,6 +60,7 @@ public class DistractionProjectile : MonoBehaviour
     {
         if (hasEmittedNoise)
             return;
+        Debug.Log("PROJECTILE HIT! Sending coordinates to the Drone.");    
 
         hasEmittedNoise = true;
 
