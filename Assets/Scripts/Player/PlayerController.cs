@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sampleRadius = 2f;
 
     private NavMeshAgent agent;
+    private readonly List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
 
     void Awake()
     {
@@ -24,10 +27,32 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (TryGetPointerPosition(out Vector2 screenPosition))
+        if (TryGetPointerPosition(out Vector2 screenPosition) && !PointerIsOverHud(screenPosition))
         {
             MoveToPosition(screenPosition);
         }
+    }
+
+    private bool PointerIsOverHud(Vector2 screenPosition)
+    {
+        EventSystem eventSystem = EventSystem.current;
+        if (eventSystem == null)
+            return false;
+
+        PointerEventData pointer = new PointerEventData(eventSystem)
+        {
+            position = screenPosition
+        };
+        uiRaycastResults.Clear();
+        eventSystem.RaycastAll(pointer, uiRaycastResults);
+
+        foreach (RaycastResult result in uiRaycastResults)
+        {
+            if (result.gameObject.GetComponentInParent<HUDController>() != null)
+                return true;
+        }
+
+        return false;
     }
 
     bool TryGetPointerPosition(out Vector2 position)

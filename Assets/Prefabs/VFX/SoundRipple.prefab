@@ -217,8 +217,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: debdd058229643cb3ae91f0ce37b3345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundRipple
-  maxRadius: 3
-  duration: 1.5
+  maxRadius: 6
+  duration: 1.2
   segments: 64
-  lineWidth: 0.06
-  rippleColor: {r: 0.1, g: 1, b: 0.3, a: 1}
+  lineWidth: 0.07
+  ringCount: 3
+  ringDelay: 0.18
+  rippleColor: {r: 0.18, g: 1, b: 0.36, a: 0.78}
