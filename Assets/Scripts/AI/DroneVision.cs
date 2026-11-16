@@ -1,18 +1,9 @@
 
 using UnityEngine;
 using UnityEngine.AI;
-using System;
 
 public class DroneVision : MonoBehaviour
 {
-    /// <summary>Raised when this vision component catches its assigned player.</summary>
-    public event Action PlayerCaught;
-
-    /// <summary>Detection timer normalized to the component's existing detectionTime.</summary>
-    public float DetectionProgress => detectionTime <= 0f
-        ? 0f
-        : Mathf.Clamp01(detectionTimer / detectionTime);
-
     [Header("References")]
     [SerializeField] private Transform player;
     [SerializeField] private DroneAI droneAI;
@@ -28,6 +19,11 @@ public class DroneVision : MonoBehaviour
 
     private float detectionTimer;
     private bool playerCaught;
+
+    // Read-only access for visuals / HUD.
+    public bool PlayerCaught => playerCaught;
+    public float DetectionProgress =>
+        detectionTime > 0f ? Mathf.Clamp01(detectionTimer / detectionTime) : 0f;
 
     void Awake()
     {
@@ -112,7 +108,6 @@ public class DroneVision : MonoBehaviour
     void CatchPlayer()
     {
         playerCaught = true;
-        PlayerCaught?.Invoke();
 
         Debug.Log("PLAYER CAUGHT! GAME OVER!");
 
